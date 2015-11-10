@@ -10,6 +10,7 @@ let xlast, ylast;
 let xpts, ypts;
 
 let svg, path_group, path_elem;
+let svgns = 'http://www.w3.org/2000/svg';
 
 let drawing = false; // set to true when mouse is down and drawing on grid
 
@@ -33,16 +34,19 @@ function segment_length (a, b) {
 
 function discrete_points_path (xpts, ypts, N) {
 
-  pts = _.zip(xpts, ypts);
+  let pts = _.zip(xpts, ypts);
 
   // compute resolution by dividing path length by number of points
-  let r = compute_path_length(pts) / N;
+  let r = compute_path_length(pts) / (N-1);
 
   let pos = pts[0];
+  let i = 1;
 
-  return _.range(N).map( (a, i) => {
+  return _.range(N).map( (a, n) => {
 
-    let to_travel = r;
+    if (n == N-1) return pts[pts.length-1];
+
+    let to_travel = n ? r : 0;
     let to_next_point = segment_length(pos, pts[i]);
     
     while (to_travel > to_next_point) {
@@ -51,8 +55,35 @@ function discrete_points_path (xpts, ypts, N) {
       to_next_point = segment_length(pos, pts[i]);
     }
 
-    pos = lin_interp(dist, pos, pt_next);
+    pos = lin_interp(to_travel, pos, pts[i]);
+
     return pos;
+  });
+}
+
+function lin_interp(dist, s, e) {
+
+  if (!dist) return s; // avoid divde by zero
+
+  let ratio = dist / segment_length(s, e);
+
+  let x = ratio * (e[0]-s[0]) + s[0];
+  let y = ratio * (e[1]-s[1]) + s[1];
+  
+  return [x, y];
+}
+
+function plot_discrete_points (xpts, ypts, N) {
+  let pts = discrete_points_path(xpts, ypts, N);
+
+  _(pts).forEach( a => {
+    let g = document.createElementNS(svgns, 'g');
+    svg.appendChild(g);
+    let c = document.createElementNS(svgns, 'circle');
+    g.appendChild(c);
+    c.setAttribute('cx', a[0]);
+    c.setAttribute('cy', a[1]);
+    c.setAttribute('r', 2);
   });
 }
 
@@ -63,12 +94,12 @@ window.onload = function () {
   svg.setAttribute('width', 800);
   svg.setAttribute('height', 400);
 
-  path_group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  path_group = document.createElementNS(svgns, 'g');
   svg.appendChild(path_group);
-  path_elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path_elem = document.createElementNS(svgns, 'path');
   path_group.appendChild(path_elem);
   path_elem.setAttribute('stroke', '#aaa');
-  path_elem.setAttribute('stroke-width', '2');
+  // path_elem.setAttribute('stroke-width', '2');
   path_elem.setAttribute('fill', 'transparent');
 
   // draw grid, maybe
