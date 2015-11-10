@@ -1,66 +1,63 @@
 "use strict";
 
-/*
-I feel like eventually we're gonna need to take this whole 'canvas-gridsize'
-package and put it into a 'drawinggrid' object. or maybe not, we'll see
-*/
-
 let canvas;
+let sketch;
 let w = 101; let h = 61;
 let size = 10;  // size of grid square in pixels (including top and left lines)
 
-// class Grid {
-//   constructor (canvas, w, h, s) {
-//     this.canvas = canvas;
-//     this.context = canvas.getContext('2d');
-//     this.w = w; this.h = h; this.s = s;
-//   }
-// }
+class Sketch {
+  constructor (canvas, width, height, box_size) {
+
+    if (size % 2) throw "only even numbers!";
+
+    this.canvas = canvas;
+    this.context = canvas.getContext('2d');
+    this.w = width; this.h = height;
+    this.size = box_size;
+  }
+
+  draw_grid () {
+    let canvas = this.canvas;
+    let context = this.context;
+
+    // size the canvas. the extra pixel is so we have enough room to draw
+    // a line at the very end
+    canvas.width = w * size + 1;
+    canvas.height = h * size + 1;
+
+    // draw vertical and horizontal lines
+    xrange(w + 1).forEach( i => {
+      context.moveTo(i * size + 0.5, 0);
+      context.lineTo(i * size + 0.5, canvas.height);
+    });
+    xrange(h + 1).forEach( j => {
+      context.moveTo(0, j * size + 0.5);
+      context.lineTo(canvas.width, j * size + 0.5);
+    });
+    context.strokeStyle = '#E6E6E6';
+    context.stroke();
+  }
+
+  /* Change the color of a grid square */
+  color_box (x, y, color) {
+    this.context.fillStyle = color;
+    this.context.fillRect(x * size + 1, y * size + 1, size - 1, size - 1);
+  }
+}
 
 window.onload = function () {
 
   // get canvas context, draw grid
-  canvas = document.getElementById('draw-on-me');
-  draw_grid(canvas, w, h, size);
+  let canvas = document.getElementById('draw-on-me');
+  sketch = new Sketch(canvas, w, h, size)
+  sketch.draw_grid();
 
-  color_box(canvas, 10, 10, size, '#444');
-  color_box(canvas, 10, 11, size, '#444');
-  color_box(canvas, 11, 10, size, '#444');
+  sketch.color_box(10, 10, '#444');
+  sketch.color_box(10, 12, '#444');
+  sketch.color_box(11, 10, '#444');
 
   // start listening for mouse events
   // document.addEventListener('mousedown', e => start_draw(e, canvas, size));
-}
-
-function draw_grid (canvas, w, h, size) {
-
-  if (size % 2) throw "only even numbers!";
-
-  // size the canvas. the extra pixel is so we have enough room to draw
-  // a line at the very end
-  canvas.width = w * size + 1;
-  canvas.height = h * size + 1;
-
-  let context = canvas.getContext('2d');
-
-  // draw vertical and horizontal lines
-  xrange(w + 1).forEach( i => {
-    context.moveTo(i * size + 0.5, 0);
-    context.lineTo(i * size + 0.5, canvas.height);
-  });
-  xrange(h + 1).forEach( j => {
-    context.moveTo(0, j * size + 0.5);
-    context.lineTo(canvas.width, j * size + 0.5);
-  });
-  context.strokeStyle = '#E6E6E6';
-  context.stroke();
-
-}
-
-/* Change the color of a grid square */
-function color_box (canvas, x, y, size, color) {
-  let context = canvas.getContext('2d');
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 1, size - 1);
 }
 
 /* Generator function similar to Python xrange -- this is THE BEST, JERRY */
