@@ -6,6 +6,13 @@
 // will be given in two arrays. a straight line connects every pair of adjacent
 // points. (x_points = [10, 12, 15, ...], y_points = [45, 46, 45, ...])
 
+let xlast, ylast;
+let xpts, ypts;
+
+let svg, path_group, path_elem;
+
+let drawing = false; // set to true when mouse is down and drawing on grid
+
 function compute_path_length (pts) {
 
   return _.range(0, pts.length - 1)
@@ -47,4 +54,68 @@ function discrete_points_path (xpts, ypts, N) {
     pos = lin_interp(dist, pos, pt_next);
     return pos;
   });
+}
+
+window.onload = function () {
+
+  // get canvas context, draw grid
+  svg = document.getElementById('draw-on-me-svg');
+  svg.setAttribute('width', 800);
+  svg.setAttribute('height', 400);
+
+  path_group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  svg.appendChild(path_group);
+  path_elem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path_group.appendChild(path_elem);
+  path_elem.setAttribute('stroke', '#aaa');
+  path_elem.setAttribute('stroke-width', '2');
+  path_elem.setAttribute('fill', 'transparent');
+
+  // draw grid, maybe
+
+  svg.addEventListener('mousedown', start_draw);
+  svg.addEventListener('mousemove', draw_points);
+  svg.addEventListener('mouseup', end_draw);
+}
+
+function start_draw (e) {
+  if (drawing) return false; // this shouldn't happen, but just in case
+  //sketch.clear_grid();
+  drawing = true;
+
+  xlast = null; ylast = null;
+  xpts = []; ypts = [];
+
+  let x = e.clientX - svg.offsetLeft;
+  let y = e.clientY - svg.offsetTop;
+  
+  add_points(x, y);
+}
+
+function draw_points (e) {
+  if (!drawing) return false;
+
+  let x = e.clientX - svg.offsetLeft;
+  let y = e.clientY - svg.offsetTop;
+  
+  add_points(x, y);
+}
+
+function end_draw (e) {
+  if (!drawing) return false; // this shouldn't happen, but just in case
+  drawing = false;
+}
+
+function add_points(x, y) {
+  xpts.push(x); ypts.push(y);
+
+  // connect last point to this point
+  if (xpts.length == 1) {
+    path_elem.setAttribute('d', 'M' + x + ' ' + y);
+  } else {
+    let current_path = path_elem.getAttribute('d');
+    path_elem.setAttribute('d', current_path + ' L ' + x + ' ' + y);
+  }
+
+  xlast = x; ylast = y;
 }
