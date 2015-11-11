@@ -179,13 +179,9 @@ function add_points(x, y) {
 // and we actually need to do the dft
 
 function transform_signal(xpts, ypts) {
-
-  // let pts = discrete_points_path(xpts, ypts, N, sample_last);
-
   // translate points so the re and im axes are in the center of the page
-  let xpts = _(xpts).map( a => a + xoff );
-  let ypts = _(ypts).map( a => a + yoff );
-
-  dft_direct(xpts, ypts);
-
+  xpts = xpts.map( a => (a - xmid*grid_space) / (10 * grid_space) );
+  ypts = ypts.map( a => (a - ymid*grid_space) / (10 * grid_space) );
+  
+  return dft_direct(xpts, ypts);
 }
