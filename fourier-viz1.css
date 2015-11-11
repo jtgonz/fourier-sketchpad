@@ -4,19 +4,21 @@
 }
 
 #draw-on-me-svg {
-  border: 1px solid #3F3F3F;
+  border: 1px solid #7F7F7F;
   display: block;
   margin-left: 30px;
+  margin-right: 20px;
+  float: left;
 }
 
 h1 {
-  font-family: 'Cabin Sketch', sans-serif;
+  font-family: 'Helvetica Neue', sans-serif;
   font-size: 50px;
-  font-weight: 400;
+  font-weight: 100;
   margin: 20px 0px 10px 30px;
   color: #3F3F3F;
 }
 
-h1 .bold {
+/*h1 .bold {
   font-weight: 700;
-}
+}*/

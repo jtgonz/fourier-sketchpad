@@ -3,7 +3,9 @@
 let canvas;
 let sketch;
 let w = 121; let h = 71;
-let size = 8;  // size of grid square in pixels (including top and left lines)
+let size = 4;  // size of grid square in pixels (including top and left lines)
+
+let lastx, lasty, signal_x, signal_y;
 
 let drawing = false; // set to true when mouse is down and drawing on grid
 
@@ -93,10 +95,15 @@ function start_draw (e) {
   sketch.clear_grid();
   drawing = true;
 
+  lastx = null; lasty = null;
+  signal_x = []; signal_y = [];
+
   let x = Math.floor((e.clientX - sketch.canvas.offsetLeft) / sketch.size);
   let y = Math.floor((e.clientY - sketch.canvas.offsetTop) / sketch.size);
+  add_to_signal(x, y);
   sketch.color_box(x, y, '#444');
   sketch.grid[x][y] = 2;  // flag as 2 to indicate that this is the start point
+  addEventListener(x, y);
 }
 
 function draw_boxes (e) {
@@ -104,6 +111,7 @@ function draw_boxes (e) {
 
   let x = Math.floor((e.clientX - sketch.canvas.offsetLeft) / sketch.size);
   let y = Math.floor((e.clientY - sketch.canvas.offsetTop) / sketch.size);
+  add_to_signal(x, y);
 
   //if (sketch.grid[x][y] == 2) {
     // if this was the start point, do something
@@ -117,3 +125,13 @@ function end_draw (e) {
   if (!drawing) return false; // this shouldn't happen, but just in case
   drawing = false;
 }
+
+// if this is a new point, add it to the signal
+function add_to_signal (x, y) {
+  if (x != lastx || y != lasty) {
+    signal_x.push(x);
+    signal_y.push(y);
+  } 
+  lastx = x; lasty = y;
+}
+
