@@ -8,7 +8,7 @@
 
 let xlast, ylast;
 let xpts, ypts;
-let grid_space = 10;
+let box = 10;
 
 let width = 800; let height = 500;
 let xmid = 40; let ymid = 25;
@@ -31,7 +31,8 @@ let svg_unit_circle;
 // arrays of svg circle elements representing discrete points on path/circle
 let svg_signal_pts, svg_unit_circle_pts;
 
-
+// svg circle elements representing frequency components of signal
+let svg_signal_circles;
 
 function handle_keys (e) {
 
@@ -54,12 +55,12 @@ function handle_keys (e) {
 function setup_visual_transform () {
   n = 0; k = 1;
   // draw unit circle and plot N discrete points clockwise around circle. After
-  // creating the discrete points, we have to scale them by 10*grid_space
-  svg_unit_circle = svg_draw_circle(xmid * grid_space, ymid * grid_space,
-    10 * grid_space, '#bbb', 'transparent');
+  // creating the discrete points, we have to scale them by 10*box
+  svg_unit_circle = svg_draw_circle(xmid * box, ymid * box,
+    10 * box, '#bbb', 'transparent');
   svg_unit_circle_pts =
     plot_discrete_points(discrete_circle_from_vector(1, 0, N).map( a => 
-      [10*grid_space*a[0]+xmid*grid_space, -10*grid_space*a[1]+ymid*grid_space]
+      [10*box*a[0]+xmid*box, -10*box*a[1]+ymid*box]
     ))[1];
 }
 
@@ -81,17 +82,61 @@ function change_freq (inc) {
   return false;
 }
 
-// de-highlight points
+/* un-highlight points */
 function dehighlight () {
   svg_highlight_circle(svg_signal_pts[n], 1.5, '', 'black', false);
   svg_highlight_circle(svg_unit_circle_pts[n * k % N], 1.5, '', 'black', false);
 }
 
-// highlight points
+/* highlight points */
 function highlight () {
   svg_highlight_circle(svg_signal_pts[n], 4, '', '#FF6666', true);
   svg_highlight_circle(svg_unit_circle_pts[n * k % N], 4, '', '#FF6666', true);
 }
+
+function plot_circles_from_vectors (num, freqs) {
+  let c = [0,0];
+  xrange(num).map( i => {
+    let vec = freqs[i]
+    plot_circle_from_vector(vec[0], vec[1], c[0], c[1]);
+    c = cpx_add(c, vec);
+  });
+}
+
+// gonna need to keep track of all dem vectors
+
+// all vectors freqs[i]
+let svg_trans_vecs, svg_trans_pts;
+
+function initialize_vectors (freqs) {
+
+}
+
+function update_vectors (step) {
+
+}
+
+function plot_points_from_vectors (num) {
+  let c = [0,0];
+  xrange(num).map( i => {
+
+    let vec = svg_trans_vecs[i];
+    let sum = cpx_add(c, vec);
+
+    // create point if it doesn't exist already
+    if (!svg_trans_pts[i]) {
+      svg_trans_pts[i] = plot_point_from_vector(sum[0], sum[1], 1.5, '#eee');
+
+    // otherwise, just update position attributes
+    } else {
+      svg_trans_pts[i].setAttribute('cx', sum[0]);
+      svg_trans_pts[i].setAttribute('cy', sum[1]);
+    }
+
+    c = cpx_add(c, vec);  // update center point (for plotting next vector)
+  });
+}
+
 
 function compute_path_length (pts) {
   return _.range(0, pts.length - 1)
@@ -172,16 +217,16 @@ window.onload = function () {
   svg.setAttribute('height', height);
 
   // draw grid lines and axes
-  _.range(width / grid_space).forEach( (a, i) => {
+  _.range(width / box).forEach( (a, i) => {
     if (i == xmid) return;
-    svg_draw_line(i*grid_space, i*grid_space, 0, height, '#DAF9FF');
+    svg_draw_line(i*box, i*box, 0, height, '#DAF9FF');
   });
-  _.range(height / grid_space).forEach( (a, i) => {
+  _.range(height / box).forEach( (a, i) => {
     if (i == ymid) return;
-    svg_draw_line(0, width, i*grid_space, i*grid_space, '#DAF9FF');
+    svg_draw_line(0, width, i*box, i*box, '#DAF9FF');
   });
-  svg_draw_line(xmid*grid_space, xmid*grid_space, 0, height, '#FFD7E0');
-  svg_draw_line(0, width, ymid*grid_space, ymid*grid_space, '#FFD7E0');
+  svg_draw_line(xmid*box, xmid*box, 0, height, '#FFD7E0');
+  svg_draw_line(0, width, ymid*box, ymid*box, '#FFD7E0');
 
   path_group = document.createElementNS(svgns, 'g');
   svg.appendChild(path_group);
@@ -289,8 +334,8 @@ function add_points(x, y) {
 
 function transform_signal(xpts, ypts) {
   // translate points so the re and im axes are in the center of the page
-  xpts = xpts.map( a => (a - xmid*grid_space) / (10 * grid_space) );
-  ypts = ypts.map( a => (a - ymid*grid_space) / (10 * grid_space) );
+  xpts = xpts.map( a => (a - xmid*box) / (10 * box) );
+  ypts = ypts.map( a => (a - ymid*box) / (10 * box) );
   
   return dft_direct(xpts, ypts);
 }
@@ -300,9 +345,16 @@ function plot_vector (x, y) {
 
 }
 
-/* Given a complex number, plot circle with corresponding magnitude and phase */
-function plot_circle_from_vector (x, y) {
-  //
+/* Given a complex number, plot circle with corresponding magnitude */
+function plot_circle_from_vector (x, y, cx, cy) {
+  return svg_draw_circle((cx * 10 + xmid) * box, (-cy * 10 + ymid) * box,
+    euclid_norm([x, y]) * 10 * box, '#bbb', 'transparent');
+}
+
+/* Given a complex number, plot point at that number */
+function plot_point_from_vector (x, y, r, c) {
+  return svg_draw_circle((x * 10 + xmid) * box, (-y * 10 + ymid) * box,
+    r, null, c);
 }
 
 /* Given a complex number, get N discrete points on the corresponding circle */
