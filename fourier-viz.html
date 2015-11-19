@@ -1,15 +1,34 @@
+<!DOCTYPE html>
 <html>
 
 <head>
+
+  <!-- MathJax 
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    CommonHTML: {
+      scale: 120
+    }
+  });
+  </script>
+    <script type="text/javascript"
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG">
+</script> -->
+
   <!-- fonts -->
   <link href='https://fonts.googleapis.com/css?family=Poiret+One|Pacifico|Amatic+SC:700|Quicksand:700,400,300|Copse|Fredericka+the+Great|Cabin+Sketch:400,700|Londrina+Sketch' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Bitter:400,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Lobster|Poiret+One|Just+Me+Again+Down+Here|Josefin+Slab:400,600,700,300,100|Lobster+Two:400,700' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,300|Raleway:400,300,500|Roboto+Slab:300,400|Noto+Serif|Vollkorn' rel='stylesheet' type='text/css'>
   
   <!-- styles -->
   <link rel='stylesheet' type='text/css' href='fourier-viz1.css'>
   
   <!-- js -->
   <!--script src="https://rawgithub.com/lodash/lodash/6f31654f5ce025af9fe6560f976c9984827267b0/dist/lodash.js"></script-->
-  <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js"></script>
+  <script src='d3.v3.min.js' charset="utf-8"></script>
   <script src='fourier.js'></script>
   <!--script src='fourier-sketch.js'></script-->
   <script src='fourier-sketch2.js'></script>
@@ -18,20 +37,92 @@
 <body>
 
   <!--h1>Fourier <span class='bold'>Sketchpad</span></h1-->
-  <h1> Fourier Explor-ier </h1>
+  <header>
+    <h1> <span class='small'>the</span> Fourier Explor-ier </h1>
+  </header>
 
   <svg id='draw-on-me-svg'></svg>
+  
+  <div class='instructions disable-select'>
 
-  <div class='input-resolution'>
-    <form onsubmit='return false;'>
-      Resolution:
-      <input id='input-field' value="100"></input>
-    </form>
+    <p>
+    This is an interactive visualization of the discrete Fourier transform.
+    <p>
+
+    <div id='dft-katex'></div>
+
+    <p>
+    Sketch a circle (or any other shape) in the window. You'll see that your 'analog' signal has been sampled at frequency N. <a href='#'>see an example</a>
+    <p>
+
+    
+    <div class='key-commands'>
+      <ul>
+        <li> 'n' to toggle the labels.</li>
+        <li> 'r' to toggle the resolution.</li>
+        <li> ENTER to continue.</li>
+      </ul>
+    </div>
+
+    <p>
+    Entering the next mode, you'll see that we've plotted a unit circle with N discrete points. Generally speaking, a point on the unit circle can be represented like this:
+    </p>
+
+    <div id='eq1'>
+    <script>
+      var elem = document.getElementById('eq1');
+      katex.render('e^{2\\pi jn/N}', elem, { displayMode: true });
+    </script>
+
+    <p>
+    By incrementing the value of n, we can step through the N points of our circle.
+    <p>
+
+    <div class='key-commands'>
+      <ul>
+        <li> RIGHT to increment n by one.</li>
+        <li> LEFT to decrement n by one.</li>
+      </ul>
+    </div>
+
+    <p>
+    If we'd like to move through the circle at a faster pace (a higher frequency), we can add a multiplier k to our expression. Now if we increment n by one, we move through n * k points on the unit circle.
+    <p>
+
+    <div id='eq2'>
+    <script>
+      var elem = document.getElementById('eq2');
+      katex.render('e^{2\\pi jkn/N}', elem, { displayMode: true });
+    </script>
+    </div>
+
+    <div class='key-commands'>
+      <ul>
+        <li> UP to increment k by one.</li>
+        <li> DOWN to decrement k by one.</li>
+      </ul>
+    </div>
+
+    <p>
+    The red vector points to value of the signal at n. The blue vector points to the corresponding point on the unit circle (given both n and k). The gray vector is the product of both of these:
+    </p>
+
+    <div id='fourier-component'></div>
+
+    <div class='key-commands'>
+      <ul>
+        <li> ENTER to continue.</li>
+      </ul>
+    </div>
+
+    <p>
+    more to come??? also will probably redo a bunch
+    </p>
+  
   </div>
-  <p>
-    n = 0, k = 0
-  </p>
-
+  </div>
+  
+</body>
 </body>
 
 </html>
